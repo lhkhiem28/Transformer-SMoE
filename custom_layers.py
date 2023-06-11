@@ -19,8 +19,8 @@ def mark_module_parallel_comm(module, comm):
     Mark all parameters in `module` as doing data parallel in `comm`, where
     `comm` may be one of `'world', 'dp', 'none'`.
     """
-    print(module)
-    assert 1 == 2
+    # print(module)
+    # assert 1 == 2
     for p in module.parameters():
         setattr(p, "dp_comm", comm)
 

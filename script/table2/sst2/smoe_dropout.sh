@@ -1,6 +1,6 @@
 python -u train_sst2.py \
     --cuda \
-    --data ../glue_data/SST-2 \
+    --data ./data/sst2 \
     --dataset sst2 \
     --n_layer 4 \
     --d_model 256 \
@@ -19,7 +19,7 @@ python -u train_sst2.py \
     --mem_len 128 \
     --eval_tgt_len 128 \
     --batch_size 16 \
-    --work_dir smoe_dropout \
+    --work_dir SMoEs \
     --pretrained_weight $1 \
     --moe --moe-num-expert 16 --moe-top-k 2 \
     --gate_name CustomNaiveGate \

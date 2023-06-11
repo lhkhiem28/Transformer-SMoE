@@ -22,7 +22,7 @@ class CustomNaiveGate(BaseGate):
 
     def __init__(self, d_model, num_expert, world_size, top_k=2):
         super().__init__(num_expert, world_size)
-        self.embedding = nn.Parameter(torch.randn([1, d_model], requires_grad=True).float().cuda())
+        self.embedding = nn.Parameter(torch.randn([1, d_model], requires_grad=False).float().cuda())
         self.hypernet = nn.Sequential(
             nn.Linear(d_model, 256),
             nn.ReLU(),

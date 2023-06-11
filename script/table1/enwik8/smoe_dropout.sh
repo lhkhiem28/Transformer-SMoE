@@ -2,7 +2,7 @@
 echo 'Run training...'
 python -u train.py \
     --cuda \
-    --data ../data/enwik8/ \
+    --data ./data/enwik8/ \
     --dataset enwik8 \
     --n_layer 4 \
     --d_model 256 \
@@ -29,4 +29,4 @@ python -u train.py \
     --dynamic_overall_steps 400000 \
     --moe-top-k-min 8 \
     --moe-top-k-max 16 \
-    --work_dir SMoE-Dropout
+    --work_dir SMoEs
