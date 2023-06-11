@@ -719,7 +719,7 @@ with open(os.path.join(args.work_dir, 'model_dense.pt'), 'rb') as f:
 para_model = model.to(device)
 
 # Run on test data.
-for gate_number in [16]:
+for gate_number in [1,2,4,8,16,32,64]:
     if gate_number <= args.moe_num_expert:
         set_top_k(model, gate_number)
         test_loss = evaluate(model, te_iter)
