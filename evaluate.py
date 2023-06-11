@@ -204,8 +204,7 @@ assert args.batch_size % args.batch_chunk == 0
 
 args.work_dir = '{}-{}'.format(args.work_dir, args.dataset)
 args.work_dir = os.path.join(args.work_dir, args.run)
-logging = create_exp_dir(args.work_dir,
-    scripts_to_save=['train.py', 'mem_transformer.py'], debug=args.debug)
+
 
 # Set the random seed manually for reproducibility.
 np.random.seed(args.seed)
@@ -455,12 +454,12 @@ if args.restart:
     else:
         print('Optimizer was not saved. Start from scratch.')
 
-logging('=' * 100)
+print('=' * 100)
 for k, v in args.__dict__.items():
-    logging('    - {} : {}'.format(k, v))
-logging('=' * 100)
-logging('#params = {}'.format(args.n_all_param))
-logging('#non emb params = {}'.format(args.n_nonemb_param))
+    print('    - {} : {}'.format(k, v))
+print('=' * 100)
+print('#params = {}'.format(args.n_all_param))
+print('#non emb params = {}'.format(args.n_nonemb_param))
 
 ###############################################################################
 # Training code
@@ -595,7 +594,7 @@ def train():
                 log_str += ' | bpc {:9.5f}'.format(cur_loss / math.log(2))
             else:
                 log_str += ' | ppl {:9.3f}'.format(math.exp(cur_loss))
-            logging(log_str)
+            print(log_str)
             train_loss = 0
             log_start_time = time.time()
 
@@ -612,7 +611,7 @@ def train():
                 val_loss_dense_swa = evaluate(swa_model.average_model, va_iter)
                 current_gate = set_router_mode(swa_model.average_model, args, flag=False)
                 val_loss_swa = evaluate(swa_model.average_model, va_iter)
-                logging('-' * 100)
+                print('-' * 100)
                 log_str = '| Eval {:3d} at step {:>8d} | time: {:5.2f}s ' \
                         '| SWA valid loss {:5.2f}'.format(
                     train_step // args.eval_interval, train_step,
@@ -621,8 +620,8 @@ def train():
                     log_str += ' | bpc {:9.5f}'.format(val_loss_swa / math.log(2))
                 else:
                     log_str += ' | valid ppl {:9.3f}'.format(math.exp(val_loss_swa))
-                logging(log_str)
-                logging('-' * 100)
+                print(log_str)
+                print('-' * 100)
                 log_str_dense = '| Eval {:3d} at step {:>8d} | time: {:5.2f}s ' \
                         '| SWA Dense valid loss {:5.2f}'.format(
                     train_step // args.eval_interval, train_step,
@@ -631,12 +630,12 @@ def train():
                     log_str_dense += ' | bpc {:9.5f}'.format(val_loss_dense_swa / math.log(2))
                 else:
                     log_str_dense += ' | valid ppl {:9.3f}'.format(math.exp(val_loss_dense_swa))
-                logging(log_str_dense)
-                logging('-' * 100)
+                print(log_str_dense)
+                print('-' * 100)
                 with open(os.path.join(args.work_dir, 'model_swa.pt'), 'wb') as f:
                     torch.save(swa_model.average_model, f)
 
-            logging('-' * 100)
+            print('-' * 100)
             log_str = '| Eval {:3d} at step {:>8d} | time: {:5.2f}s ' \
                       '| valid loss {:5.2f}'.format(
                 train_step // args.eval_interval, train_step,
@@ -645,8 +644,8 @@ def train():
                 log_str += ' | bpc {:9.5f}'.format(val_loss / math.log(2))
             else:
                 log_str += ' | valid ppl {:9.3f}'.format(math.exp(val_loss))
-            logging(log_str)
-            logging('-' * 100)
+            print(log_str)
+            print('-' * 100)
             log_str_dense = '| Eval {:3d} at step {:>8d} | time: {:5.2f}s ' \
                       '| Dense valid loss {:5.2f}'.format(
                 train_step // args.eval_interval, train_step,
@@ -655,8 +654,8 @@ def train():
                 log_str_dense += ' | bpc {:9.5f}'.format(val_loss_dense / math.log(2))
             else:
                 log_str_dense += ' | valid ppl {:9.3f}'.format(math.exp(val_loss_dense))
-            logging(log_str_dense)
-            logging('-' * 100)
+            print(log_str_dense)
+            print('-' * 100)
             # Save the model if the validation loss is the best we've seen so far.
             if not best_val_loss or val_loss < best_val_loss:
                 if not args.debug:
@@ -705,12 +704,12 @@ all_top_k = []
 #     for epoch in itertools.count(start=1):
 #         train()
 #         if train_step == args.max_step:
-#             logging('-' * 100)
-#             logging('End of training')
+#             print('-' * 100)
+#             print('End of training')
 #             break
 # except KeyboardInterrupt:
-#     logging('-' * 100)
-#     logging('Exiting from training early')
+#     print('-' * 100)
+#     print('Exiting from training early')
 
 
 # Load the best saved model.
@@ -723,14 +722,14 @@ for gate_number in [1,2,4,8,16,32,64]:
     if gate_number <= args.moe_num_expert:
         set_top_k(model, gate_number)
         test_loss = evaluate(model, te_iter)
-        logging('=' * 100)
+        print('=' * 100)
         if args.dataset in ['enwik8', 'text8']:
-            logging('Dense | End of training | Gate-Number {:.0f} | test loss {:5.2f} | test bpc {:9.5f}'.format(
+            print('Dense | End of training | Gate-Number {:.0f} | test loss {:5.2f} | test bpc {:9.5f}'.format(
                 gate_number, test_loss, test_loss / math.log(2)))
         else:
-            logging('Dense | End of training | Gate-Number {:.0f} | test loss {:5.2f} | test ppl {:9.3f}'.format(
+            print('Dense | End of training | Gate-Number {:.0f} | test loss {:5.2f} | test ppl {:9.3f}'.format(
                 gate_number, test_loss, math.exp(test_loss)))
-        logging('=' * 100)
+        print('=' * 100)
 
 
 # with open(os.path.join(args.work_dir, 'model.pt'), 'rb') as f:
@@ -742,14 +741,14 @@ for gate_number in [1,2,4,8,16,32,64]:
 #     if gate_number <= args.moe_num_expert:
 #         set_top_k(model, gate_number)
 #         test_loss = evaluate(model, te_iter)
-#         logging('=' * 100)
+#         print('=' * 100)
 #         if args.dataset in ['enwik8', 'text8']:
-#             logging('| End of training | Gate-Number {:.0f} | test loss {:5.2f} | test bpc {:9.5f}'.format(
+#             print('| End of training | Gate-Number {:.0f} | test loss {:5.2f} | test bpc {:9.5f}'.format(
 #                 gate_number, test_loss, test_loss / math.log(2)))
 #         else:
-#             logging('| End of training | Gate-Number {:.0f} | test loss {:5.2f} | test ppl {:9.3f}'.format(
+#             print('| End of training | Gate-Number {:.0f} | test loss {:5.2f} | test ppl {:9.3f}'.format(
 #                 gate_number, test_loss, math.exp(test_loss)))
-#         logging('=' * 100)
+#         print('=' * 100)
 
 
 # if args.swad:
@@ -762,14 +761,14 @@ for gate_number in [1,2,4,8,16,32,64]:
 #         if gate_number <= args.moe_num_expert:
 #             set_top_k(model, gate_number)
 #             test_loss = evaluate(model, te_iter)
-#             logging('=' * 100)
+#             print('=' * 100)
 #             if args.dataset in ['enwik8', 'text8']:
-#                 logging('SWAD | End of training | Gate-Number {:.0f} | test loss {:5.2f} | test bpc {:9.5f}'.format(
+#                 print('SWAD | End of training | Gate-Number {:.0f} | test loss {:5.2f} | test bpc {:9.5f}'.format(
 #                     gate_number, test_loss, test_loss / math.log(2)))
 #             else:
-#                 logging('SWAD | End of training | Gate-Number {:.0f} | test loss {:5.2f} | test ppl {:9.3f}'.format(
+#                 print('SWAD | End of training | Gate-Number {:.0f} | test loss {:5.2f} | test ppl {:9.3f}'.format(
 #                     gate_number, test_loss, math.exp(test_loss)))
-#             logging('=' * 100)
+#             print('=' * 100)
 
 
 # all_top_k = np.array(all_top_k)

@@ -205,8 +205,7 @@ assert args.batch_size % args.batch_chunk == 0
 
 args.work_dir = '{}-{}'.format(args.work_dir, args.dataset)
 args.work_dir = os.path.join(args.work_dir, args.run)
-logging = create_exp_dir(args.work_dir,
-    scripts_to_save=['train.py', 'mem_transformer.py'], debug=args.debug)
+
 
 # Set the random seed manually for reproducibility.
 np.random.seed(args.seed)
@@ -451,21 +450,21 @@ if args.restart:
     else:
         print('Optimizer was not saved. Start from scratch.')
 
-logging('=' * 100)
+print('=' * 100)
 for k, v in args.__dict__.items():
-    logging('    - {} : {}'.format(k, v))
-logging('=' * 100)
-logging('#params = {}'.format(args.n_all_param))
-logging('#non emb params = {}'.format(args.n_nonemb_param))
+    print('    - {} : {}'.format(k, v))
+print('=' * 100)
+print('#params = {}'.format(args.n_all_param))
+print('#non emb params = {}'.format(args.n_nonemb_param))
 ###############################################################################
 # Training code
 ###############################################################################
 
 
 
-logging('=' * 100)
-logging('==== loading pretrained model from {} ===='.format(args.pretrained_weight))
-logging('=' * 100)
+print('=' * 100)
+print('==== loading pretrained model from {} ===='.format(args.pretrained_weight))
+print('=' * 100)
 
 # Load the best saved model.
 with open(args.pretrained_weight, 'rb') as f:
@@ -474,9 +473,9 @@ pretrained_model_checkpoint = pretrained_model.state_dict()
 filtered_checkpoint = {}
 for key in pretrained_model_checkpoint.keys():
     if not key in model.state_dict():
-        logging('Can not load {}'.format(key))
+        print('Can not load {}'.format(key))
     elif not pretrained_model_checkpoint[key].shape == model.state_dict()[key].shape:
-        logging('Can not load {}, shape do not match'.format(key))
+        print('Can not load {}, shape do not match'.format(key))
     else:
         filtered_checkpoint[key] = pretrained_model_checkpoint[key]
 
@@ -595,7 +594,7 @@ def train():
                       '| ms/batch {:5.2f} | loss {:5.2f} | Accuracy {:5.2f}'.format(
                 epoch, train_step, batch+1, optimizer.param_groups[0]['lr'],
                 elapsed * 1000 / args.log_interval, cur_loss, cur_acc*100)
-            logging(log_str)
+            print(log_str)
             train_loss = 0
             log_start_time = time.time()
 
@@ -612,35 +611,35 @@ def train():
                 val_acc_dense_swa = evaluate(swa_model.average_model, va_iter)
                 current_gate = set_router_mode(swa_model.average_model, args, flag=False)
                 val_acc_swa = evaluate(swa_model.average_model, va_iter)
-                logging('-' * 100)
+                print('-' * 100)
                 log_str = '| Eval {:3d} at step {:>8d} | time: {:5.2f}s ' \
                         '| SWA valid Accuracy {:5.2f}'.format(
                     train_step // args.eval_interval, train_step,
                     (time.time() - eval_start_time), val_acc_swa)
-                logging(log_str)
-                logging('-' * 100)
+                print(log_str)
+                print('-' * 100)
                 log_str_dense = '| Eval {:3d} at step {:>8d} | time: {:5.2f}s ' \
                         '| SWA Dense valid Accuracy {:5.2f}'.format(
                     train_step // args.eval_interval, train_step,
                     (time.time() - eval_start_time), val_acc_dense_swa)
-                logging(log_str_dense)
-                logging('-' * 100)
+                print(log_str_dense)
+                print('-' * 100)
                 with open(os.path.join(args.work_dir, 'model_swa.pt'), 'wb') as f:
                     torch.save(swa_model.average_model, f)
 
-            logging('-' * 100)
+            print('-' * 100)
             log_str = '| Eval {:3d} at step {:>8d} | time: {:5.2f}s ' \
                       '| valid Accuracy {:5.2f}'.format(
                 train_step // args.eval_interval, train_step,
                 (time.time() - eval_start_time), val_acc)
-            logging(log_str)
-            logging('-' * 100)
+            print(log_str)
+            print('-' * 100)
             log_str_dense = '| Eval {:3d} at step {:>8d} | time: {:5.2f}s ' \
                       '| Dense valid Accuracy {:5.2f}'.format(
                 train_step // args.eval_interval, train_step,
                 (time.time() - eval_start_time), val_acc_dense)
-            logging(log_str_dense)
-            logging('-' * 100)
+            print(log_str_dense)
+            print('-' * 100)
             # Save the model if the validation loss is the best we've seen so far.
             if not best_val_acc or val_acc > best_val_acc:
                 if not args.debug:
@@ -685,12 +684,12 @@ all_top_k = []
 #     for epoch in itertools.count(start=1):
 #         train()
 #         if train_step == args.max_step:
-#             logging('-' * 100)
-#             logging('End of training')
+#             print('-' * 100)
+#             print('End of training')
 #             break
 # except KeyboardInterrupt:
-#     logging('-' * 100)
-#     logging('Exiting from training early')
+#     print('-' * 100)
+#     print('Exiting from training early')
 
 
 # Load the best saved model.
@@ -703,14 +702,14 @@ for gate_number in [1,2,4,8,16,32,64]:
     if gate_number <= args.moe_num_expert:
         set_top_k(model, gate_number)
         test_loss = evaluate(model, te_iter)
-        logging('=' * 100)
+        print('=' * 100)
         if args.dataset in ['enwik8', 'text8']:
-            logging('Dense | End of training | Gate-Number {:.0f} | test loss {:5.2f}'.format(
+            print('Dense | End of training | Gate-Number {:.0f} | test loss {:5.2f}'.format(
                 gate_number, test_loss))
         else:
-            logging('Dense | End of training | Gate-Number {:.0f} | test loss {:5.2f}'.format(
+            print('Dense | End of training | Gate-Number {:.0f} | test loss {:5.2f}'.format(
                 gate_number, test_loss))
-        logging('=' * 100)
+        print('=' * 100)
 
 
 # with open(os.path.join(args.work_dir, 'model.pt'), 'rb') as f:
@@ -722,14 +721,14 @@ for gate_number in [1,2,4,8,16,32,64]:
 #     if gate_number <= args.moe_num_expert:
 #         set_top_k(model, gate_number)
 #         test_loss = evaluate(model, te_iter)
-#         logging('=' * 100)
+#         print('=' * 100)
 #         if args.dataset in ['enwik8', 'text8']:
-#             logging('Top-2 | End of training | Gate-Number {:.0f} | test loss {:5.2f}'.format(
+#             print('Top-2 | End of training | Gate-Number {:.0f} | test loss {:5.2f}'.format(
 #                 gate_number, test_loss))
 #         else:
-#             logging('Top-2 | End of training | Gate-Number {:.0f} | test loss {:5.2f}'.format(
+#             print('Top-2 | End of training | Gate-Number {:.0f} | test loss {:5.2f}'.format(
 #                 gate_number, test_loss))
-#         logging('=' * 100)
+#         print('=' * 100)
 
 # if args.swad:
 #     with open(os.path.join(args.work_dir, 'model_swa.pt'), 'rb') as f:
@@ -741,14 +740,14 @@ for gate_number in [1,2,4,8,16,32,64]:
 #         if gate_number <= args.moe_num_expert:
 #             set_top_k(model, gate_number)
 #             test_loss = evaluate(model, te_iter)
-#             logging('=' * 100)
+#             print('=' * 100)
 #             if args.dataset in ['enwik8', 'text8']:
-#                 logging('SWAD | End of training | Gate-Number {:.0f} | test loss {:5.2f}'.format(
+#                 print('SWAD | End of training | Gate-Number {:.0f} | test loss {:5.2f}'.format(
 #                     gate_number, test_loss))
 #             else:
-#                 logging('SWAD | End of training | Gate-Number {:.0f} | test loss {:5.2f}'.format(
+#                 print('SWAD | End of training | Gate-Number {:.0f} | test loss {:5.2f}'.format(
 #                     gate_number, test_loss))
-#             logging('=' * 100)
+#             print('=' * 100)
 
 # if len(all_top_k) and all_top_k[0] != None:
 #     all_top_k = np.array(all_top_k)
