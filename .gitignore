@@ -2,3 +2,4 @@ data/*
 ckps/*
 
 __pycache__
+gate_scores/*
