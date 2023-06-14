@@ -351,6 +351,14 @@ args.n_nonemb_param = sum([p.nelement() for p in model.layers.parameters()])
 set_threshold(model, args)
 freeze_part_weight(model, args)
 
+print(model)
+for name, param in model.named_parameters():
+    if param.requires_grad:
+        if 'hypernet' in name:
+            param.requires_grad = False
+print("Total of Prams: ", sum(p.numel() for p in model.parameters()))
+print("Total of Trainable Prams: ", sum(p.numel() for p in model.parameters() if p.requires_grad))
+
 if args.fp16:
     model = model.half()
 
