@@ -2,7 +2,7 @@
 echo 'Run evaluating...'
 python -u evaluate.py \
     --cuda \
-    --data ./data/enwik8/ \
+    --data ./data/pretraining/enwik8/ \
     --dataset enwik8 \
     --n_layer 4 \
     --d_model 256 \
@@ -29,5 +29,5 @@ python -u evaluate.py \
     --dynamic_overall_steps 400000 \
     --moe-top-k-min 8 \
     --moe-top-k-max 16 \
-    --work_dir ckps/SMoEs \
+    --work_dir ckps/pretraining/SMoEs \
     --run $1 \
