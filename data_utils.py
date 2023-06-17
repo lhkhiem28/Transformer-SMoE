@@ -274,10 +274,9 @@ class Corpus(object):
             self.vocab.count_csqa(os.path.join(path, 'dev_rand_split.jsonl'), add_cls_token=True)
             self.vocab.count_csqa(os.path.join(path, 'test_rand_split_no_answers.jsonl'), add_cls_token=True)
 
-        elif self.dataset in ['sst2', 'sst2_v2']:
+        elif self.dataset in ['sst2', 'sst2_v2', 'imdb']:
             self.vocab.count_sst2(os.path.join(path, 'train.tsv'), add_cls_token=True)
             self.vocab.count_sst2(os.path.join(path, 'dev.tsv'), add_cls_token=True)
-            self.vocab.count_sst2(os.path.join(path, 'test.tsv'), add_cls_token=True)
 
         self.vocab.build_vocab()
 
@@ -306,7 +305,7 @@ class Corpus(object):
                 os.path.join(path, 'train_rand_split.jsonl'), ordered=True, add_cls_token=True)
             self.valid = self.vocab.encode_csqa_file(
                 os.path.join(path, 'dev_rand_split.jsonl'), ordered=True, add_cls_token=True)
-        elif self.dataset == 'sst2':
+        elif self.dataset in ['sst2', 'imdb']:
             self.train = self.vocab.encode_sst2_file(
                 os.path.join(path, 'train.tsv'), add_cls_token=True)
             self.valid = self.vocab.encode_sst2_file(
@@ -328,7 +327,7 @@ class Corpus(object):
                 data_iter = LMMultiFileIterator(self.train, self.vocab, *args, **kwargs)
             elif self.dataset == 'csqa':
                 data_iter = CSQAIterator(self.train, *args, **kwargs)
-            elif self.dataset == 'sst2':
+            elif self.dataset in ['sst2', 'imdb']:
                 data_iter = SST2Iterator(self.train, *args, **kwargs)
                 # dataset = CSQADataset(self.train)
                 # data_iter = DataLoader(dataset, *args, shuffle=True, 
@@ -342,7 +341,7 @@ class Corpus(object):
                 data_iter = LMShuffledIterator(data, *args, **kwargs)
             elif self.dataset == 'csqa':
                 data_iter = CSQAIterator(self.valid, *args, **kwargs)
-            elif self.dataset == 'sst2':
+            elif self.dataset in ['sst2', 'imdb']:
                 data_iter = SST2Iterator(self.valid, *args, **kwargs)
 
                 # dataset = CSQADataset(self.valid)
@@ -370,7 +369,7 @@ def get_lm_corpus(datadir, dataset):
             kwargs['special'] = []
             kwargs['lower_case'] = False
             kwargs['vocab_file'] = os.path.join(datadir, '1b_word_vocab.txt')
-        elif dataset in ['csqa', 'sst2', 'sst2_v2']:
+        elif dataset in ['csqa', 'sst2', 'sst2_v2', 'imdb']:
             kwargs['special'] = ['<eos>']
         elif dataset in ['enwik8', 'text8']:
             pass

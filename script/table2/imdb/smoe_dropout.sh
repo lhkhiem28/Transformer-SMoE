@@ -1,7 +1,7 @@
 python -u train_sst2.py \
     --cuda \
-    --data ./data/finetuning/sst2 \
-    --dataset sst2 \
+    --data ./data/finetuning/imdb \
+    --dataset imdb \
     --n_layer 4 \
     --d_model 256 \
     --n_head 8 \
@@ -12,13 +12,13 @@ python -u train_sst2.py \
     --optim adam \
     --lr 1e-4 \
     --warmup_step 0 \
-    --max_step 5000 \
-    --eval-interval 5000 \
-    --log-interval 100 \
+    --max_step 15000 \
+    --eval-interval 15000 \
+    --log-interval 300 \
     --tgt_len 512 \
     --mem_len 128 \
     --eval_tgt_len 128 \
-    --batch_size 16 \
+    --batch_size 4 \
     --work_dir ckps/finetuning/SMoEs-enwik8 \
     --pretrained_weight $1 \
     --moe --moe-num-expert 16 --moe-top-k 2 \
@@ -26,6 +26,6 @@ python -u train_sst2.py \
     --dynamic_moe \
     --freeze_gate \
     --dynamic_moe_mode linear_increase \
-    --dynamic_overall_steps 5000 \
+    --dynamic_overall_steps 15000 \
     --moe-top-k-min 16 \
     --moe-top-k-max 16 
