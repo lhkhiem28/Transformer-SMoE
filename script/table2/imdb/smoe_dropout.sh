@@ -13,7 +13,7 @@ python -u train_sst2.py \
     --lr 1e-4 \
     --warmup_step 0 \
     --max_step 15000 \
-    --eval-interval 15000 \
+    --eval-interval 1500 \
     --log-interval 300 \
     --tgt_len 512 \
     --mem_len 128 \
