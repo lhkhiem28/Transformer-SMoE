@@ -100,6 +100,23 @@ class Vocab(object):
                 self.counter.update(sentence_toks)
                 sents.append(sentence_toks)
         return sents
+    
+    def count_sst5(self, path, verbose=False, add_eos=False, add_double_eos=False, add_cls_token=False):
+        if verbose: print('counting file {} ...'.format(path))
+        assert os.path.exists(path)
+        sents = []
+        with open(path, 'r', encoding='utf-8') as f:
+            tsv_file = csv.reader(f, delimiter="\t")
+            for line in tsv_file:
+                if not line[1] in ['0', '1', '2', '3', '4']: 
+                    # print('* Ignore ', line)
+                    continue
+                sentence, label = line[0], int(line[1])
+                assert label in [0,1,2,3,4]
+                sentence_toks = self.tokenize(sentence, add_eos=add_eos, add_double_eos=add_double_eos, add_cls_token=add_cls_token)
+                self.counter.update(sentence_toks)
+                sents.append(sentence_toks)
+        return sents
 
     def count_sents(self, sents, verbose=False):
         """
@@ -220,9 +237,9 @@ class Vocab(object):
 
         labels = torch.LongTensor(labels)
         return [encoded, labels]
-
-    def encode_sst2_file_v2(self, path, verbose=False, add_eos=False,
-            add_double_eos=False, add_cls_token_last=False):
+    
+    def encode_sst5_file(self, path, verbose=False, add_eos=False,
+            add_double_eos=False, add_cls_token=False):
         if verbose: print('encoding file {} ...'.format(path))
         assert os.path.exists(path)
         encoded = []
@@ -230,17 +247,18 @@ class Vocab(object):
         with open(path, 'r', encoding='utf-8') as f:
             tsv_file = csv.reader(f, delimiter="\t")
             for line in tsv_file: 
-                if not line[1] in ['0', '1']: 
+                if not line[1] in ['0', '1', '2', '3', '4']: 
                     print('* Ignore ', line)
                     continue
                 sentence, label = line[0], int(line[1])
-                assert label in [0,1]
-                sentence_toks = self.tokenize(sentence, add_eos=add_eos, add_double_eos=add_double_eos, add_cls_token_last=add_cls_token_last)
+                assert label in [0,1,2,3,4]
+                sentence_toks = self.tokenize(sentence, add_eos=add_eos, add_double_eos=add_double_eos, add_cls_token=add_cls_token)
                 encoded.append(self.convert_to_tensor(sentence_toks))
                 labels.append(label)
 
         labels = torch.LongTensor(labels)
         return [encoded, labels]
+
 
     def encode_sents(self, sents, ordered=False, verbose=False):
         if verbose: print('encoding {} sents ...'.format(len(sents)))
