@@ -721,7 +721,7 @@ class MemTransformerLM(nn.Module):
             nn.Linear(self.d_model, self.d_model),
             nn.Tanh(),
             nn.Dropout(0.1),
-            nn.Linear(self.d_model, 77)
+            nn.Linear(self.d_model, 2)
         )
 
         self.sample_softmax = sample_softmax
