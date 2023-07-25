@@ -10,12 +10,45 @@ import torch.nn.functional as F
 import pdb
 import numpy as np 
 
-__all__ = ['CustomNaiveGate', 'CustomDropGate', 'CustomRandomGate', 'CustomRandomGate_Dense',
+__all__ = ['CustomNaiveGate', 'CustomNaiveGate_HyperNet', 'CustomDropGate', 'CustomRandomGate', 'CustomRandomGate_Dense',
             'CustomDTSGate', 'CustomDTSRandomGate', 'CustomDTSGate_softmax', 'CustomDTSRandomGate_softmax',
             'CustomDenseGate', 'CustomHashGate', 'CustomNaiveGate_Balance', 'CustomNaiveGate_Attn']
 
-
 class CustomNaiveGate(BaseGate):
+    r"""
+    Naive Gate
+    """
+
+    def __init__(self, d_model, num_expert, world_size, top_k=2):
+        super().__init__(num_expert, world_size)
+        self.gate = nn.Linear(d_model, self.tot_expert)
+        self.top_k = top_k
+        self.dense_moe_flag = False
+
+    def forward(self, inp, return_all_scores=False):
+
+        gate = self.gate(inp)
+
+        if self.dense_moe_flag:
+            gate = torch.ones_like(gate) # average the importance of all experts
+            gate_top_k_val, gate_top_k_idx = torch.topk(
+                gate, k=self.tot_expert, dim=-1, largest=True, sorted=False
+            )
+            gate_top_k_val = gate_top_k_val.view(-1, self.tot_expert)
+        else:
+            gate_top_k_val, gate_top_k_idx = torch.topk(
+                gate, k=self.top_k, dim=-1, largest=True, sorted=False
+            )  # [.. x top_k]
+            gate_top_k_val = gate_top_k_val.view(-1, self.top_k)
+        # (BxL) x 1 x top_k
+
+        gate_score = F.softmax(gate_top_k_val, dim=-1)
+
+        if return_all_scores:
+            return gate_top_k_idx, gate_score, gate
+        return gate_top_k_idx, gate_score
+
+class CustomNaiveGate_HyperNet(BaseGate):
     r"""
     Naive Gate
     """
