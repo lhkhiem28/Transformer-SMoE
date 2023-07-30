@@ -1,10 +1,10 @@
 #!/bin/bash
-echo 'Run evaluating...'
+echo 'Run training...'
 cd source/
-python -u evaluate.py \
+python -u train.py \
     --cuda \
-    --data ../datasets/pretraining/enwik8/ \
-    --dataset enwik8 \
+    --data ../datasets/pretraining/wt103/ \
+    --dataset wt103 \
     --n_layer 4 \
     --d_model 256 \
     --n_head 8 \
@@ -22,12 +22,11 @@ python -u evaluate.py \
     --batch_size 22 \
     --multi_gpu \
     --moe --moe-num-expert 16 --moe-top-k 2 \
-    --gate_name CustomNaiveGate_HyperNet \
+    --gate_name CustomNaiveGate --freeze_gate \
     --moe_index 0,1,2,3 \
-    --freeze_gate \
     --dynamic_moe \
     --dynamic_moe_mode linear_increase \
     --dynamic_overall_steps 400000 \
     --moe-top-k-min 8 \
     --moe-top-k-max 16 \
-    --work_dir ../ckps/pretraining/SMoEs --run $1 \
+    --work_dir ../ckps/pretraining/SMoEs

@@ -1,8 +1,8 @@
 cd source/
-python -u train_sst2.py \
+python -u train_downstream.py \
     --cuda \
-    --data ../datasets/finetuning/sst5 \
-    --dataset sst5 \
+    --data ../datasets/finetuning/banking77 \
+    --dataset banking77 \
     --n_layer 4 \
     --d_model 256 \
     --n_head 8 \
@@ -13,8 +13,8 @@ python -u train_sst2.py \
     --optim adam \
     --lr 1e-4 \
     --warmup_step 0 \
-    --max_step 2000 \
-    --eval-interval 200 \
+    --max_step 7500 \
+    --eval-interval 750 \
     --log-interval 100 \
     --tgt_len 512 \
     --mem_len 128 \
@@ -27,6 +27,6 @@ python -u train_sst2.py \
     --dynamic_moe \
     --freeze_gate \
     --dynamic_moe_mode linear_increase \
-    --dynamic_overall_steps 2000 \
+    --dynamic_overall_steps 7500 \
     --moe-top-k-min 16 \
     --moe-top-k-max 16 
