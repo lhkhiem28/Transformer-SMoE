@@ -651,7 +651,7 @@ class MemTransformerLM(nn.Module):
                  cutoffs=[], adapt_inp=False,
                  same_length=False, attn_type=0, clamp_len=-1,
                  sample_softmax=-1, moe=False, moe_num_expert=64, moe_top_k=2, gate_name=NaiveGate, moe_index=None, 
-                 dense_drop=False, expert_drop=0.5, num_expert=64):
+                 dense_drop=False, expert_drop=0.5, num_expert=64, num_classes=2):
         super(MemTransformerLM, self).__init__()
         self.n_token = n_token
 
@@ -721,7 +721,7 @@ class MemTransformerLM(nn.Module):
             nn.Linear(self.d_model, self.d_model),
             nn.Tanh(),
             nn.Dropout(0.1),
-            nn.Linear(self.d_model, 2)
+            nn.Linear(self.d_model, num_classes)
         )
 
         self.sample_softmax = sample_softmax

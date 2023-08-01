@@ -236,6 +236,13 @@ corpus = get_lm_corpus(args.data, args.dataset)
 ntokens = len(corpus.vocab)
 args.n_token = ntokens
 
+if args.dataset in ["sst2", "imdb"]:
+    num_classes = 2
+if args.dataset == "sst5":
+    num_classes = 5
+if args.dataset == "banking77":
+    num_classes = 77
+
 eval_batch_size = 10
 
 # for CSQA
@@ -341,7 +348,7 @@ else:
         same_length=args.same_length, attn_type=args.attn_type,
         clamp_len=args.clamp_len, sample_softmax=args.sample_softmax,
         moe=args.moe, moe_num_expert=args.moe_num_expert, moe_top_k=args.moe_top_k, gate_name=args.gate_name, moe_index=moe_index,
-        dense_drop=args.dense_drop, expert_drop=args.expert_drop, num_expert=args.num_expert)
+        dense_drop=args.dense_drop, expert_drop=args.expert_drop, num_expert=args.num_expert, num_classes=num_classes)
     model.apply(weights_init)
     model.word_emb.apply(weights_init) # ensure embedding init is not overridden by out_layer in case of weight sharing
 args.n_all_param = sum([p.nelement() for p in model.parameters()])

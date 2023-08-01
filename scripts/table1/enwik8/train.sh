@@ -22,7 +22,7 @@ python -u train.py \
     --batch_size 22 \
     --multi_gpu \
     --moe --moe-num-expert 16 --moe-top-k 2 \
-    --gate_name CustomNaiveGate --freeze_gate \
+    --gate_name CustomNaiveGate_HyperNet --freeze_gate \
     --moe_index 0,1,2,3 \
     --dynamic_moe \
     --dynamic_moe_mode linear_increase \
