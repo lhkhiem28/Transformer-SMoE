@@ -10,7 +10,7 @@ import torch.nn.functional as F
 import pdb
 import numpy as np 
 
-__all__ = ['CustomNaiveGate', 'CustomNaiveGate_HyperNet', 'CustomDropGate', 'CustomRandomGate', 'CustomRandomGate_Dense',
+__all__ = ['CustomNaiveGate', 'CustomNaiveGate_HyperNet', 'CustomNaiveGate_XMoE', 'CustomDropGate', 'CustomRandomGate', 'CustomRandomGate_Dense',
             'CustomDTSGate', 'CustomDTSRandomGate', 'CustomDTSGate_softmax', 'CustomDTSRandomGate_softmax',
             'CustomDenseGate', 'CustomHashGate', 'CustomNaiveGate_Balance', 'CustomNaiveGate_Attn']
 
