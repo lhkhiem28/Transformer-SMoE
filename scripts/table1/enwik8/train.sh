@@ -29,4 +29,4 @@ python -u train.py \
     --dynamic_overall_steps 400000 \
     --moe-top-k-min 8 \
     --moe-top-k-max 16 \
-    --work_dir ../ckps/pretraining/SMoEs
+    --work_dir ../ckps/pretraining/SMoE
