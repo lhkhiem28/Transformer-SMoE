@@ -23,7 +23,7 @@ python -u train_downstream.py \
     --work_dir ../ckps/finetuning/SMoE-enwik8 \
     --pretrained_weight $1 \
     --moe --moe-num-expert 16 --moe-top-k 2 \
-    --gate_name CustomNaiveGate_HyperNet \
+    --gate_name CustomNaiveGate \
     --dynamic_moe \
     --freeze_gate \
     --dynamic_moe_mode linear_increase \
