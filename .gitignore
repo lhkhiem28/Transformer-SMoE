@@ -1,6 +1,7 @@
 datasets/*
 ckps/*
 
+**/*.out
 __pycache__
 **/__pycache__
 **/gate_scores/*
