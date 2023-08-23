@@ -548,11 +548,11 @@ def train():
                 loss += args.load_balance * balance_loss
 
             if args.distillation > 0:
-                balance_loss = 0
+                distillation_loss = 0
                 for name, m in model.named_modules():
                     if isinstance(m, CustomNaiveGate_Distill):
-                        balance_loss += m.loss
-                loss += args.distillation * balance_loss
+                        distillation_loss += m.distillation_loss
+                loss += args.distillation * distillation_loss
 
             if args.fp16:
                 optimizer.backward(loss)

@@ -298,7 +298,7 @@ class CustomNaiveGate_Distill(BaseGate):
         self.dense_moe_flag = False
         self.loss = None
 
-    def set_distillation(self, gate, gate_top_k_idx):
+    def set_load_balance(self, gate, gate_top_k_idx):
         # gate_top_k_idx (tokens_number, top-k)
         # gate_top_k_val (tokens_number, top-k)
 
@@ -314,6 +314,23 @@ class CustomNaiveGate_Distill(BaseGate):
 
         loss = (fraction_expert * prob_expert).sum() * self.tot_expert
         self.loss = loss
+
+    def set_distillation(self, gate, gate_top_k_idx):
+        # gate_top_k_idx (tokens_number, top-k)
+        # gate_top_k_val (tokens_number, top-k)
+
+        score = F.softmax(gate, dim=-1)
+        valid_idx = gate_top_k_idx[gate_top_k_idx > -1]
+        fraction_expert = torch.scatter_add(
+                torch.zeros(self.tot_expert, device=valid_idx.device),
+                0,
+                valid_idx,
+                torch.ones_like(valid_idx, dtype=torch.float),
+            ) / valid_idx.numel()
+        prob_expert = score.sum(dim=0) / valid_idx.numel()
+
+        loss = (fraction_expert * prob_expert).sum() * self.tot_expert
+        self.distillation_loss = loss
 
     def forward(self, inp, return_all_scores=False):
 
@@ -334,6 +351,7 @@ class CustomNaiveGate_Distill(BaseGate):
 
         gate_score = F.softmax(gate_top_k_val, dim=-1)
 
+        self.set_load_balance(gate, gate_top_k_idx)
         self.set_distillation(gate, gate_top_k_idx)
 
         if return_all_scores:
