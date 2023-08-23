@@ -511,6 +511,14 @@ def train():
 
     for batch, (data, target, seq_len) in enumerate(train_iter):
 
+        if args.gate_name == "CustomNaiveGate_Distill":
+            if batch > int(0.1*args.max_step):
+                if batch == int(0.1*args.max_step) + 1:
+                    print("Switch to Stage 2")
+                for name, m in model.named_modules():
+                    if isinstance(m, CustomNaiveGate_Distill):
+                        m.is_stage2 = True
+
         if args.gate_name == 'CustomDTSGate':
             set_temperature(model, train_step, args.max_step, args.max_temp, args.min_temp)
 

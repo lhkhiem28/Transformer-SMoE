@@ -301,6 +301,8 @@ class CustomNaiveGate_Distill(BaseGate):
         torch.nn.init.orthogonal_(expert_embeddings, gain=0.1)
         self.register_parameter("expert_embeddings", torch.nn.Parameter(expert_embeddings))
 
+        self.is_stage2 = False
+
         distill_expert_embeddings = torch.empty(num_expert, 50)
         torch.nn.init.orthogonal_(distill_expert_embeddings, gain=0.1)
         self.register_parameter("distill_expert_embeddings", torch.nn.Parameter(distill_expert_embeddings))
@@ -326,28 +328,59 @@ class CustomNaiveGate_Distill(BaseGate):
 
     def forward(self, inp, return_all_scores=False):
 
-        gate = inp.matmul(self.expert_embeddings.T)
+        if not self.is_stage2:
+            gate = inp.matmul(self.expert_embeddings.T)
 
-        if self.dense_moe_flag:
-            gate = torch.ones_like(gate) # average the importance of all experts
-            gate_top_k_val, gate_top_k_idx = torch.topk(
-                gate, k=self.tot_expert, dim=-1, largest=True, sorted=False
-            )
-            gate_top_k_val = gate_top_k_val.view(-1, self.tot_expert)
+            if self.dense_moe_flag:
+                gate = torch.ones_like(gate) # average the importance of all experts
+                gate_top_k_val, gate_top_k_idx = torch.topk(
+                    gate, k=self.tot_expert, dim=-1, largest=True, sorted=False
+                )
+                gate_top_k_val = gate_top_k_val.view(-1, self.tot_expert)
+            else:
+                gate_top_k_val, gate_top_k_idx = torch.topk(
+                    gate, k=self.top_k, dim=-1, largest=True, sorted=False
+                )  # [.. x top_k]
+                gate_top_k_val = gate_top_k_val.view(-1, self.top_k)
+            # (BxL) x 1 x top_k
+
+            gate_score = F.softmax(gate_top_k_val, dim=-1)
+
+            self.set_load_balance(gate, gate_top_k_idx)
+            self.distillation_loss = 0.0
+
+            if return_all_scores:
+                return gate_top_k_idx, gate_score, gate
+            return gate_top_k_idx, gate_score
         else:
-            gate_top_k_val, gate_top_k_idx = torch.topk(
-                gate, k=self.top_k, dim=-1, largest=True, sorted=False
-            )  # [.. x top_k]
-            gate_top_k_val = gate_top_k_val.view(-1, self.top_k)
-        # (BxL) x 1 x top_k
+            for _, p in self.inp_reduction.named_parameters():
+                p.requires_grad = False
+            self.distill_expert_embeddings.requires_grad = False
 
-        gate_score = F.softmax(gate_top_k_val, dim=-1)
+            reduced_inp = self.inp_reduction(inp)
+            gate = reduced_inp.matmul(self.distill_expert_embeddings.T)
 
-        self.set_load_balance(gate, gate_top_k_idx)
+            if self.dense_moe_flag:
+                gate = torch.ones_like(gate) # average the importance of all experts
+                gate_top_k_val, gate_top_k_idx = torch.topk(
+                    gate, k=self.tot_expert, dim=-1, largest=True, sorted=False
+                )
+                gate_top_k_val = gate_top_k_val.view(-1, self.tot_expert)
+            else:
+                gate_top_k_val, gate_top_k_idx = torch.topk(
+                    gate, k=self.top_k, dim=-1, largest=True, sorted=False
+                )  # [.. x top_k]
+                gate_top_k_val = gate_top_k_val.view(-1, self.top_k)
+            # (BxL) x 1 x top_k
 
-        if return_all_scores:
-            return gate_top_k_idx, gate_score, gate
-        return gate_top_k_idx, gate_score
+            gate_score = F.softmax(gate_top_k_val, dim=-1)
+
+            self.loss = 0.0
+            self.distillation_loss = 0.0
+
+            if return_all_scores:
+                return gate_top_k_idx, gate_score, gate
+            return gate_top_k_idx, gate_score
 
 class CustomNaiveGate_HyperNet(BaseGate):
     r"""
