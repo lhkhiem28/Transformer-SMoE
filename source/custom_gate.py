@@ -17,6 +17,7 @@ __all__ = [
     'CustomNaiveGate_Attn', 
     'CustomNaiveGate_Balance', 
     'CustomNaiveGate_XMoE', 
+    'CustomNaiveGate_Distill', 
     'CustomNaiveGate_HyperNet', 
 ]
 
@@ -120,7 +121,7 @@ class CustomNaiveGate(BaseGate):
 
 class CustomNaiveGate_Attn(BaseGate):
     r"""
-    Naive Gate
+    Naive Gate Attention
     """
 
     def __init__(self, d_model, num_expert, world_size, top_k=2):
@@ -208,7 +209,7 @@ class CustomNaiveGate_Balance(BaseGate):
 
 class CustomNaiveGate_XMoE(BaseGate):
     r"""
-    Naive Gate
+    Naive Gate XMoE
     """
 
     def __init__(self, d_model, num_expert, world_size, top_k=2):
@@ -221,6 +222,8 @@ class CustomNaiveGate_XMoE(BaseGate):
         self.register_parameter("expert_embeddings", torch.nn.Parameter(expert_embeddings))
 
         self.inp_reduction = torch.nn.Linear(d_model, 16, bias=False)
+
+        self.temperature = 1.0
 
     def forward(self, inp, return_all_scores=False):
 
@@ -245,7 +248,7 @@ class CustomNaiveGate_XMoE(BaseGate):
             gate_top_k_val = gate_top_k_val.view(-1, self.top_k)
         # (BxL) x 1 x top_k
 
-        gate_score = F.softmax(gate_top_k_val, dim=-1)
+        gate_score = F.softmax(gate_top_k_val/self.temperature, dim=-1)
 
         if return_all_scores:
             return gate_top_k_idx, gate_score, gate
@@ -265,9 +268,63 @@ class CustomNaiveGate_XMoE(BaseGate):
             scores[~ok] = scores[ok].min()
         return scores
 
+class CustomNaiveGate_Distill(BaseGate):
+    r"""
+    Naive Gate StableMoE
+    """
+
+    def __init__(self, d_model, num_expert, world_size, top_k=2):
+        super().__init__(num_expert, world_size)
+        self.gate = nn.Linear(d_model, self.tot_expert)
+        self.top_k = top_k
+        self.dense_moe_flag = False
+        self.loss = None
+
+    def set_distillation(self, gate, gate_top_k_idx):
+        # gate_top_k_idx (tokens_number, top-k)
+        # gate_top_k_val (tokens_number, top-k)
+
+        score = F.softmax(gate, dim=-1)
+        valid_idx = gate_top_k_idx[gate_top_k_idx > -1]
+        fraction_expert = torch.scatter_add(
+                torch.zeros(self.tot_expert, device=valid_idx.device),
+                0,
+                valid_idx,
+                torch.ones_like(valid_idx, dtype=torch.float),
+            ) / valid_idx.numel()
+        prob_expert = score.sum(dim=0) / valid_idx.numel()
+
+        loss = (fraction_expert * prob_expert).sum() * self.tot_expert
+        self.loss = loss
+
+    def forward(self, inp, return_all_scores=False):
+
+        gate = self.gate(inp)
+
+        if self.dense_moe_flag:
+            gate = torch.ones_like(gate) # average the importance of all experts
+            gate_top_k_val, gate_top_k_idx = torch.topk(
+                gate, k=self.tot_expert, dim=-1, largest=True, sorted=False
+            )
+            gate_top_k_val = gate_top_k_val.view(-1, self.tot_expert)
+        else:
+            gate_top_k_val, gate_top_k_idx = torch.topk(
+                gate, k=self.top_k, dim=-1, largest=True, sorted=False
+            )  # [.. x top_k]
+            gate_top_k_val = gate_top_k_val.view(-1, self.top_k)
+        # (BxL) x 1 x top_k
+
+        gate_score = F.softmax(gate_top_k_val, dim=-1)
+
+        self.set_distillation(gate, gate_top_k_idx)
+
+        if return_all_scores:
+            return gate_top_k_idx, gate_score, gate
+        return gate_top_k_idx, gate_score
+
 class CustomNaiveGate_HyperNet(BaseGate):
     r"""
-    Naive Gate
+    Naive Gate HyperRouter
     """
 
     def __init__(self, d_model, num_expert, world_size, top_k=2):
