@@ -13,12 +13,12 @@ import torch.nn as nn
 import torch.optim as optim
 
 from data_utils import get_lm_corpus
-from mem_transformer_sst2 import MemTransformerLM
+from mem_transformer_downstream import MemTransformerLM
 from utils.exp_utils import create_exp_dir
 from utils.data_parallel import BalancedDataParallel
 from fmoe.gates.base_gate import BaseGate
 
-from new_utils import *
+from latest_utils import *
 
 import warnings 
 warnings.filterwarnings(action= 'ignore')

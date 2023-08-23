@@ -279,7 +279,7 @@ class RelMultiHeadAttn(nn.Module):
         raise NotImplementedError
 
 
-from custom_transformer2 import FMoETransformerMLP as moe_qkv
+from custom_transformer import FMoETransformerMLP2 as moe_qkv
 from custom_transformer import FMoETransformerMLP
 from custom_gate import *
 from fmoe.gates import NaiveGate

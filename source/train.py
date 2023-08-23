@@ -18,7 +18,7 @@ from utils.exp_utils import create_exp_dir
 from utils.data_parallel import BalancedDataParallel
 from fmoe.gates.base_gate import BaseGate
 from custom_gate import CustomNaiveGate_Balance
-from new_utils import *
+from latest_utils import *
 
 import warnings 
 warnings.filterwarnings(action= 'ignore')
