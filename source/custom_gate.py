@@ -331,6 +331,10 @@ class CustomNaiveGate_Distill(BaseGate):
         if not self.is_stage2:
             gate = inp.matmul(self.expert_embeddings.T)
 
+            reduced_inp = self.inp_reduction(inp)
+            distill_gate = reduced_inp.matmul(self.distill_expert_embeddings.T)
+            distillation_loss = F.cross_entropy(distill_gate, gate)
+
             if self.dense_moe_flag:
                 gate = torch.ones_like(gate) # average the importance of all experts
                 gate_top_k_val, gate_top_k_idx = torch.topk(
@@ -347,7 +351,7 @@ class CustomNaiveGate_Distill(BaseGate):
             gate_score = F.softmax(gate_top_k_val, dim=-1)
 
             self.set_load_balance(gate, gate_top_k_idx)
-            self.distillation_loss = 0.0
+            self.distillation_loss = distillation_loss
 
             if return_all_scores:
                 return gate_top_k_idx, gate_score, gate
