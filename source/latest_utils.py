@@ -200,4 +200,3 @@ class THOR_Model(nn.Module):
         else:
             outputs = self.module(data, target, *mems)
         return outputs[1:]
-

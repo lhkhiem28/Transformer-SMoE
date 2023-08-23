@@ -56,4 +56,4 @@ class SwitchGate(NaiveGate):
         prob_expert = score.sum(dim=0) / valid_idx.numel()
         loss = (fraction_expert * prob_expert).sum() * self.tot_expert
         self.set_loss(loss)
-        return top1_idx, top1_score 
+        return top1_idx, top1_score

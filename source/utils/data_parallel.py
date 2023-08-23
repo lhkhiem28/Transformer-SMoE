@@ -88,4 +88,3 @@ class BalancedDataParallel(DataParallel):
         else:
             return super().scatter(inputs, kwargs, device_ids)
         return scatter_kwargs(inputs, kwargs, device_ids, chunk_sizes, dim=self.dim)
-

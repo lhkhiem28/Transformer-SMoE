@@ -144,4 +144,3 @@ if __name__ == '__main__':
     print('logits shape', logits.size())
     print('out_labels', out_labels.detach().numpy().tolist())
     print('out_labels shape', out_labels.size())
-

@@ -89,4 +89,3 @@ class FMoELinear(nn.Module):
         # bias is left to zero, similar as megatron
 
         torch.nn.init.kaiming_uniform_(self.weight, a=math.sqrt(5))
-
