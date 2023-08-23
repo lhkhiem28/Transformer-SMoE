@@ -216,6 +216,7 @@ class CustomNaiveGate_XMoE(BaseGate):
         super().__init__(num_expert, world_size)
         self.top_k = top_k
         self.dense_moe_flag = False
+        self.loss = None
 
         expert_embeddings = torch.empty(num_expert, 16)
         torch.nn.init.orthogonal_(expert_embeddings, gain=0.32)
@@ -223,7 +224,22 @@ class CustomNaiveGate_XMoE(BaseGate):
 
         self.inp_reduction = torch.nn.Linear(d_model, 16, bias=False)
 
-        self.temperature = 1.0
+    def set_load_balance(self, gate, gate_top_k_idx):
+        # gate_top_k_idx (tokens_number, top-k)
+        # gate_top_k_val (tokens_number, top-k)
+
+        score = F.softmax(gate/0.3, dim=-1)
+        valid_idx = gate_top_k_idx[gate_top_k_idx > -1]
+        fraction_expert = torch.scatter_add(
+                torch.zeros(self.tot_expert, device=valid_idx.device),
+                0,
+                valid_idx,
+                torch.ones_like(valid_idx, dtype=torch.float),
+            ) / valid_idx.numel()
+        prob_expert = score.sum(dim=0) / valid_idx.numel()
+
+        loss = (fraction_expert * prob_expert).sum() * self.tot_expert
+        self.loss = loss
 
     def forward(self, inp, return_all_scores=False):
 
@@ -248,7 +264,9 @@ class CustomNaiveGate_XMoE(BaseGate):
             gate_top_k_val = gate_top_k_val.view(-1, self.top_k)
         # (BxL) x 1 x top_k
 
-        gate_score = F.softmax(gate_top_k_val/self.temperature, dim=-1)
+        gate_score = F.softmax(gate_top_k_val, dim=-1)
+
+        self.set_load_balance(gate, gate_top_k_idx)
 
         if return_all_scores:
             return gate_top_k_idx, gate_score, gate
