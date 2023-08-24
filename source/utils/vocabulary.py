@@ -7,8 +7,6 @@ from collections import Counter, OrderedDict
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pad_sequence
 
-
-
 class Vocab(object):
     def __init__(self, special=[], min_freq=0, max_size=None, lower_case=True,
                  delimiter=None, vocab_file=None):
@@ -296,7 +294,6 @@ class Vocab(object):
 
         labels = torch.LongTensor(labels)
         return [encoded, labels]
-
 
     def encode_sents(self, sents, ordered=False, verbose=False):
         if verbose: print('encoding {} sents ...'.format(len(sents)))

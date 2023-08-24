@@ -2,10 +2,8 @@ import os
 import torch
 import torch.distributed as dist
 
-
 from .config import float_from_env, switch_from_env
 from fmoe.functions import get_moe_group
-
 
 def global_policy(local_expert_count, _gec, num_expert, world_size):
     r"""
@@ -59,11 +57,9 @@ def global_policy(local_expert_count, _gec, num_expert, world_size):
             break
     return res
 
-
 def no_shadow_policy(_lec, _gec, num_expert, world_size):
     res = torch.zeros(world_size * num_expert, dtype=bool)
     return res
-
 
 def get_shadow_policy(d_model=None):
     if d_model is not None and 'FMOE_FASTER_GLBPLC_DMODEL' not in os.environ:

@@ -1,8 +1,4 @@
-r"""
-Utils to play with PyTorch.
-"""
 import torch.distributed as dist
-
 
 # pylint: disable=broad-except
 # pylint: disable=protected-access

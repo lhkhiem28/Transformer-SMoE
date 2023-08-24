@@ -77,7 +77,6 @@ def sample_logits(embedding, bias, labels, inputs, sampler):
 
     return logits
 
-
 # class LogUniformSampler(object):
 #     def __init__(self, range_max, unique=False):
 #         """
@@ -111,7 +110,6 @@ def sample_logits(embedding, bias, labels, inputs, sampler):
 #         sample_prob = self.dist[sample]
 
 #         return new_labels, sample, sample_prob
-
 
 if __name__ == '__main__':
     S, B = 3, 4

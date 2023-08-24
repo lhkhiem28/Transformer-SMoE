@@ -1,4 +1,3 @@
-# coding: utf-8
 import pdb
 import argparse
 import time
@@ -159,7 +158,6 @@ parser.add_argument('--moe-num-expert', type=int, default=64,
 parser.add_argument('--moe-top-k', type=int, default=2,
                     help='top_k experts in hard gate of moe')
 
-
 ## other settings
 parser.add_argument('--gate_name', type=str, default='NaiveGate',
                     help='Router Type')
@@ -253,7 +251,6 @@ eval_batch_size = 10
 tr_iter = corpus.get_iterator('train', args.batch_size)
 va_iter = corpus.get_iterator('valid', args.batch_size)
 te_iter = va_iter
-
 
 # adaptive softmax / embedding
 cutoffs, tie_projs = [], [False]
@@ -474,8 +471,6 @@ logging('#non emb params = {}'.format(args.n_nonemb_param))
 # Training code
 ###############################################################################
 
-
-
 logging('=' * 100)
 logging('==== loading pretrained model from {} ===='.format(args.pretrained_weight))
 logging('=' * 100)
@@ -494,8 +489,6 @@ for key in pretrained_model_checkpoint.keys():
         filtered_checkpoint[key] = pretrained_model_checkpoint[key]
 
 model.load_state_dict(filtered_checkpoint, strict=False)
-
-
 
 def evaluate(model, eval_iter):
     # Turn on evaluation mode which disables dropout.
@@ -577,7 +570,6 @@ def train():
         optimizer.step()
         if args.sample_softmax > 0:
             optimizer_sparse.step()
-
 
         # step-wise learning rate annealing
         train_step += 1
@@ -680,7 +672,6 @@ def train():
         if train_step == args.max_step:
             break
 
-
 # Loop over epochs.
 train_step = 0
 train_loss = 0
@@ -704,7 +695,6 @@ try:
 except KeyboardInterrupt:
     logging('-' * 100)
     logging('Exiting from training early')
-
 
 # Load the best saved model.
 with open(os.path.join(args.work_dir, 'model_dense.pt'), 'rb') as f:

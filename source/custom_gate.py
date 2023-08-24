@@ -1,11 +1,8 @@
-r"""
-Custom Gate
-"""
-from fmoe.gates.base_gate import BaseGate
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+
+from fmoe.gates.base_gate import BaseGate
 
 import pdb
 import numpy as np 

@@ -1,13 +1,9 @@
-r"""
-FMoE's parallel linear layer
-"""
 import torch
 import torch.nn as nn
 from torch.autograd import Function
 import math
 
 import fmoe_cuda
-
 
 class MOELinear(Function):
     r"""
@@ -34,8 +30,6 @@ class MOELinear(Function):
             grad_bias = None
 
         return grad_inp_buf, None, grad_weight, grad_bias
-
-
 
 class FMoELinear(nn.Module):
     r"""

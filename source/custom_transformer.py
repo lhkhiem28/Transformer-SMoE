@@ -1,11 +1,7 @@
-r"""
-Adaption to act as the MLP layer using an MoE MLP layer in transformer.
-"""
 import torch
 import torch.nn as nn
 from custom_layers import FMoE
 from linear import FMoELinear
-
 
 class _Expert(nn.Module):
     r"""
@@ -28,7 +24,6 @@ class _Expert(nn.Module):
         x = self.activation(x)
         x = self.h4toh(x, fwd_expert_count)
         return x
-
 
 class FMoETransformerMLP(FMoE):
     r"""
@@ -80,7 +75,6 @@ class _Expert2(nn.Module):
         """
         x = self.htoh4(inp, fwd_expert_count)
         return x
-
 
 class FMoETransformerMLP2(FMoE):
     r"""

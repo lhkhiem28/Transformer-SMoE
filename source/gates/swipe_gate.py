@@ -1,6 +1,3 @@
-r"""
-Balanced gate using SWIPE algorithm
-"""
 import math
 import torch
 import torch.distributed as dist
@@ -10,7 +7,6 @@ from .naive_gate import NaiveGate
 
 from fmoe.functions import count_by_gate
 import fmoe_cuda as fmoe_native
-
 
 class SwipeGate(NaiveGate):
     def __init__(self, d_model, num_expert, world_size, top_k=2):
@@ -22,7 +18,6 @@ class SwipeGate(NaiveGate):
                     self.num_expert, self.world_size, bias)
             idx_new = idx_new.to(idx.device)
         return idx_new, capacity
-
 
     def forward(self, inp):
         score = self.gate(inp)

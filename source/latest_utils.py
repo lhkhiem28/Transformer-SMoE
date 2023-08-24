@@ -8,11 +8,9 @@ from custom_gate import CustomNaiveGate_Attn
 import pdb
 import torch.nn.functional as F
 
-
 __all__ = ['set_top_k', 'set_router_mode', 'freeze_part_weight', 'adjust_moe_gate_number',
             'show_dts_gate_number', 'set_temperature', 'set_threshold', 
             'SWA_Average', 'collect_top_k', 'THOR_Model']
-
 
 def set_top_k(model, num=2):
     for name, m in model.named_modules():
@@ -131,7 +129,6 @@ def adjust_moe_gate_number(model, steps, args, current_gate):
         current_gate = new_gate_num
     return current_gate
 
-
 ## Dense to Sparse
 def show_dts_gate_number(model):
     for name, m in model.named_modules():
@@ -153,8 +150,6 @@ def set_threshold(model, args):
         for name, m in model.named_modules():
             if isinstance(m, BaseGate):
                 m.threshold = args.threshold
-
-
 
 ## Weight Average
 class SWA_Average(nn.Module):

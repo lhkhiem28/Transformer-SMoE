@@ -5,7 +5,6 @@ import numpy as np
 
 import torch
 
-
 def logging(s, log_path, print_=True, log_=True):
     if print_:
         print(s)

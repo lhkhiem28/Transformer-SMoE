@@ -579,7 +579,6 @@ class RelPartialLearnableDecoderLayer(nn.Module):
 
         return output
 
-
 class AdaptiveEmbedding(nn.Module):
     def __init__(self, n_token, d_embed, d_proj, cutoffs, div_val=1,
                  sample_softmax=False):
@@ -748,7 +747,6 @@ class MemTransformerLM(nn.Module):
                         self.crit.out_projs[i].weight = self.word_emb.emb_projs[0].weight
                     elif tie_proj and div_val != 1:
                         self.crit.out_projs[i].weight = self.word_emb.emb_projs[i].weight
-
 
         self.same_length = same_length
         self.clamp_len = clamp_len

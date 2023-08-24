@@ -1,4 +1,3 @@
-# coding: utf-8
 import argparse
 import time
 import math
@@ -158,7 +157,6 @@ parser.add_argument('--moe-num-expert', type=int, default=64,
 
 parser.add_argument('--moe-top-k', type=int, default=2,
                     help='top_k experts in hard gate of moe')
-
 
 ## other settings
 parser.add_argument('--gate_name', type=str, default='NaiveGate',
@@ -343,7 +341,6 @@ else:
 args.n_all_param = sum([p.nelement() for p in model.parameters()])
 args.n_nonemb_param = sum([p.nelement() for p in model.layers.parameters()])
 
-
 # for Dense to Sparse Method
 set_threshold(model, args)
 freeze_part_weight(model, args)
@@ -464,7 +461,6 @@ logging('#non emb params = {}'.format(args.n_nonemb_param))
 ###############################################################################
 # Training code
 ###############################################################################
-
 
 def evaluate(model, eval_iter):
     # Turn on evaluation mode which disables dropout.
@@ -703,7 +699,6 @@ def train():
         if train_step == args.max_step:
             break
 
-
 # Loop over epochs.
 train_step = 0
 train_loss = 0
@@ -725,7 +720,6 @@ try:
 except KeyboardInterrupt:
     logging('-' * 100)
     logging('Exiting from training early')
-
 
 # Load the best saved model.
 with open(os.path.join(args.work_dir, 'model_dense.pt'), 'rb') as f:

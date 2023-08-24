@@ -1,12 +1,8 @@
-r"""
-Balanced gate with GShard's policy (Google, 2020)
-"""
 import math
 import torch
 import torch.nn.functional as F
 from .naive_gate import NaiveGate
 from .utils import limit_by_capacity
-
 
 class GShardGate(NaiveGate):
     def __init__(self, d_model, num_expert, world_size,

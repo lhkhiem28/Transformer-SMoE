@@ -1,6 +1,5 @@
-
-from torch.nn.parallel import DataParallel
 import torch
+from torch.nn.parallel import DataParallel
 from torch.nn.parallel._functions import Scatter
 from torch.nn.parallel.parallel_apply import parallel_apply
 

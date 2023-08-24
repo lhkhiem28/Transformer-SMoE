@@ -1,12 +1,8 @@
-r"""
-Naive gate
-"""
-from .base_gate import BaseGate
-
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+from .base_gate import BaseGate
 
 class NaiveGate(BaseGate):
     r"""

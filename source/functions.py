@@ -1,17 +1,9 @@
-r"""
-The fmoe.functions module contains functions that are directly warped up from
-C/CUDA functions to complete distributed communication, computation and gradient
-computation.
-"""
-
 import torch
 from torch.autograd import Function
 import fmoe_cuda
 from custom_utils import get_torch_default_comm
 
-
 _moe_group = None
-
 
 def ensure_comm(t, comm):
     if comm is None:
@@ -20,10 +12,8 @@ def ensure_comm(t, comm):
     _moe_group = comm
     fmoe_cuda.ensure_nccl(comm, t)
 
-
 def get_moe_group():
     return _moe_group
-
 
 def count_by_gate(gate, num_expert, world_size, require_pos=True):
     with torch.no_grad():
@@ -47,7 +37,6 @@ def count_by_gate(gate, num_expert, world_size, require_pos=True):
             pos = torch.empty((pos_size,), device=gate.device, dtype=torch.long)
             fmoe_cuda.assign_pos(lec_cum, gate, pos)
     return pos, local_expert_count, global_expert_count
-
 
 def prepare_forward(gate, num_expert, world_size):
     r"""
@@ -74,11 +63,9 @@ def prepare_forward(gate, num_expert, world_size):
         fwd_batch_size,
     )
 
-
 def _local_scatter(inp, pos):
     inp_buf = torch.index_select(inp, 0, pos)
     return inp_buf
-
 
 def _local_gather(inp, pos, out_batch_size, maybe_overlap=True):
     inp_buf = torch.zeros(out_batch_size, inp.shape[-1],
@@ -88,7 +75,6 @@ def _local_gather(inp, pos, out_batch_size, maybe_overlap=True):
     else:
         inp_buf.index_copy_(0, pos, inp)
     return inp_buf
-
 
 class MOEScatter(Function):
     r"""
@@ -192,7 +178,6 @@ class MOEGather(Function):
             global_grad_out_buf = grad_out_buf
         return global_grad_out_buf, None, None, None, None, None
 
-
 class AllGather(Function):
     r"""
     A wrapper for the All-Gather function to support auto-differentiation.
@@ -211,7 +196,6 @@ class AllGather(Function):
     def backward(ctx, grad_out):
         rank, dim0 = ctx.args
         return grad_out[rank * dim0 : (rank + 1) * dim0], None, None, None
-
 
 class Slice(Function):
     r"""

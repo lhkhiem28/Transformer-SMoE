@@ -278,7 +278,6 @@ class RelMultiHeadAttn(nn.Module):
     def forward(self, w, r, attn_mask=None, mems=None):
         raise NotImplementedError
 
-
 from custom_transformer import FMoETransformerMLP2 as moe_qkv
 from custom_transformer import FMoETransformerMLP
 from custom_gate import *
@@ -601,8 +600,6 @@ class RelLearnableMultiHeadAttn(RelMultiHeadAttn):
 
         return output
 
-
-
 class CustomizedMoEPositionwiseFF(FMoETransformerMLP):
     def __init__(self, d_model, d_inner, dropout, pre_lnorm=False, moe_num_expert=64, moe_top_k=2, gate_name=NaiveGate):
         activation = nn.Sequential(
@@ -729,7 +726,6 @@ class RelPartialLearnableDecoderLayer(nn.Module):
         output = self.pos_ff(output)
 
         return output
-
 
 class AdaptiveEmbedding(nn.Module):
     def __init__(self, n_token, d_embed, d_proj, cutoffs, div_val=1,

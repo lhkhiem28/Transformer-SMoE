@@ -9,7 +9,6 @@ from utils.vocabulary import Vocab
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pad_sequence
 
-
 def pad_sequence_reverse(data):
     # data should be a list of 1D tensors
 
@@ -27,7 +26,6 @@ def pad_sequence_reverse(data):
         padded_data_list.append(padded_item)
     padded_data_list = torch.cat(padded_data_list, dim=1)
     return padded_data_list
-
 
 class LMOrderedIterator(object):
     def __init__(self, data, bsz, bptt, device='cpu', ext_len=None):
@@ -83,8 +81,6 @@ class LMOrderedIterator(object):
     def __iter__(self):
         return self.get_fixlen_iter()
 
-
-
 class SST2Iterator(object):
     def __init__(self, data, bsz):
         """
@@ -136,7 +132,6 @@ class SST2Iterator(object):
 
     def __iter__(self):
         return self.get_fixlen_iter()
-
 
 class LMShuffledIterator(object):
     def __init__(self, data, bsz, bptt, device='cpu', ext_len=None, shuffle=False):
@@ -217,7 +212,6 @@ class LMShuffledIterator(object):
         for batch in self.stream_iterator(sent_stream):
             yield batch
 
-
 class LMMultiFileIterator(LMShuffledIterator):
     def __init__(self, paths, vocab, bsz, bptt, device='cpu', ext_len=None,
         shuffle=False):
@@ -249,7 +243,6 @@ class LMMultiFileIterator(LMShuffledIterator):
             sent_stream = self.get_sent_stream(path)
             for batch in self.stream_iterator(sent_stream):
                 yield batch
-
 
 class Corpus(object):
     def __init__(self, path, dataset, *args, **kwargs):
@@ -329,7 +322,6 @@ class Corpus(object):
             self.valid = self.vocab.encode_banking77_file(
                 os.path.join(path, 'dev.tsv'), add_cls_token=True)
 
-
     def get_iterator(self, split, *args, **kwargs):
 
         if split == 'train':
@@ -361,7 +353,6 @@ class Corpus(object):
                 # data_iter = DataLoader(dataset, *args, shuffle=False, 
                 #                     num_workers=4, drop_last=False, pin_memory=True)
         return data_iter
-
 
 def get_lm_corpus(datadir, dataset):
 

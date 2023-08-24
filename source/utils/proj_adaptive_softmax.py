@@ -1,6 +1,6 @@
-from collections import defaultdict
 import pdb
 import numpy as np
+from collections import defaultdict
 
 import torch
 import torch.nn as nn
@@ -154,8 +154,6 @@ class ProjectedAdaptiveLogSoftmax(nn.Module):
                 offset += logprob_i.size(0)
 
         return nll
-
-
 
 class ProjectedAdaptiveLogSoftmax_new(nn.Module):
     def __init__(self, n_token, d_embed, d_proj, cutoffs, div_val=1,

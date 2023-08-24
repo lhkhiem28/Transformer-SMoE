@@ -1,6 +1,3 @@
-r"""
-FMoE core layer
-"""
 import tree
 import os
 import torch
@@ -13,7 +10,6 @@ from gates import NaiveGate
 
 from fastermoe.config import switch_from_env
 
-
 def mark_module_parallel_comm(module, comm):
     r"""
     Mark all parameters in `module` as doing data parallel in `comm`, where
@@ -23,7 +19,6 @@ def mark_module_parallel_comm(module, comm):
     # assert 1 == 2
     for p in module.parameters():
         setattr(p, "dp_comm", comm)
-
 
 def _fmoe_general_global_forward(inp, gate, expert_fn, num_expert, world_size, **kwargs):
     r"""
@@ -79,12 +74,10 @@ def _fmoe_general_global_forward(inp, gate, expert_fn, num_expert, world_size, *
     outp = tree.map_structure(gather_func, x)
     return outp
 
-
 fmoe_faster_schedule = False
 if switch_from_env('FMOE_FASTER_SCHEDULE_ENABLE', False):
     fmoe_faster_schedule = True
     from .fastermoe.schedule import _fmoe_general_global_forward
-
 
 class FMoE(nn.Module):
     r"""

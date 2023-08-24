@@ -1,6 +1,3 @@
-r"""
-The smart schedule proposed in FasterMoE.
-"""
 import torch
 from torch.autograd.function import Function
 
@@ -10,7 +7,6 @@ import fmoe_cuda as fmoe_native
 from fmoe.fastermoe import expert_utils
 
 from .shadow_policy import get_shadow_policy
-
 
 class MoEForward(Function):
     @staticmethod
@@ -105,9 +101,7 @@ class MoEForward(Function):
 
         return (None, None, grad_in, None, None, None, None, None, None, None, None)
 
-
 policy_fn = None
-
 
 def _fmoe_general_global_forward(inp, gate, expert_fn, n_expert, world_size, experts=None, stored_models=None):
     # TODO: Using multiple tensors as input is to be supported.
