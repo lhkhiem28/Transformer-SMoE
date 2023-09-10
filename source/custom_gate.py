@@ -15,7 +15,7 @@ __all__ = [
     'CustomNaiveGate_Balance', 
     'CustomNaiveGate_XMoE', 
     'CustomNaiveGate_Distill', 
-    'CustomNaiveGate_HyperNet', 
+    # 'CustomNaiveGate_HyperNet', 
 ]
 
 class CustomDenseGate(BaseGate):
@@ -295,22 +295,14 @@ class CustomNaiveGate_Distill(BaseGate):
         self.loss = None
 
         expert_embeddings = torch.empty(num_expert, d_model)
-        torch.nn.init.orthogonal_(expert_embeddings, gain=0.1)
+        torch.nn.init.orthogonal_(expert_embeddings, gain=0.32)
         self.register_parameter("expert_embeddings", torch.nn.Parameter(expert_embeddings))
-
-        self.is_stage2 = False
-
-        distill_expert_embeddings = torch.empty(num_expert, 50)
-        torch.nn.init.orthogonal_(distill_expert_embeddings, gain=0.1)
-        self.register_parameter("distill_expert_embeddings", torch.nn.Parameter(distill_expert_embeddings))
-
-        self.inp_reduction = torch.nn.Linear(d_model, 50, bias=False)
 
     def set_load_balance(self, gate, gate_top_k_idx):
         # gate_top_k_idx (tokens_number, top-k)
         # gate_top_k_val (tokens_number, top-k)
 
-        score = F.softmax(gate, dim=-1)
+        score = F.softmax(gate/0.3, dim=-1)
         valid_idx = gate_top_k_idx[gate_top_k_idx > -1]
         fraction_expert = torch.scatter_add(
                 torch.zeros(self.tot_expert, device=valid_idx.device),
@@ -325,92 +317,8 @@ class CustomNaiveGate_Distill(BaseGate):
 
     def forward(self, inp, return_all_scores=False):
 
-        if not self.is_stage2:
-            gate = inp.matmul(self.expert_embeddings.T)
-
-            reduced_inp = self.inp_reduction(inp)
-            distill_gate = reduced_inp.matmul(self.distill_expert_embeddings.T)
-            distillation_loss = F.cross_entropy(distill_gate, gate)
-
-            if self.dense_moe_flag:
-                gate = torch.ones_like(gate) # average the importance of all experts
-                gate_top_k_val, gate_top_k_idx = torch.topk(
-                    gate, k=self.tot_expert, dim=-1, largest=True, sorted=False
-                )
-                gate_top_k_val = gate_top_k_val.view(-1, self.tot_expert)
-            else:
-                gate_top_k_val, gate_top_k_idx = torch.topk(
-                    gate, k=self.top_k, dim=-1, largest=True, sorted=False
-                )  # [.. x top_k]
-                gate_top_k_val = gate_top_k_val.view(-1, self.top_k)
-            # (BxL) x 1 x top_k
-
-            gate_score = F.softmax(gate_top_k_val, dim=-1)
-
-            self.set_load_balance(gate, gate_top_k_idx)
-            self.distillation_loss = distillation_loss
-
-            if return_all_scores:
-                return gate_top_k_idx, gate_score, gate
-            return gate_top_k_idx, gate_score
-        else:
-            for _, p in self.inp_reduction.named_parameters():
-                p.requires_grad = False
-            self.distill_expert_embeddings.requires_grad = False
-
-            reduced_inp = self.inp_reduction(inp)
-            gate = reduced_inp.matmul(self.distill_expert_embeddings.T)
-
-            if self.dense_moe_flag:
-                gate = torch.ones_like(gate) # average the importance of all experts
-                gate_top_k_val, gate_top_k_idx = torch.topk(
-                    gate, k=self.tot_expert, dim=-1, largest=True, sorted=False
-                )
-                gate_top_k_val = gate_top_k_val.view(-1, self.tot_expert)
-            else:
-                gate_top_k_val, gate_top_k_idx = torch.topk(
-                    gate, k=self.top_k, dim=-1, largest=True, sorted=False
-                )  # [.. x top_k]
-                gate_top_k_val = gate_top_k_val.view(-1, self.top_k)
-            # (BxL) x 1 x top_k
-
-            gate_score = F.softmax(gate_top_k_val, dim=-1)
-
-            self.loss = 0.0
-            self.distillation_loss = 0.0
-
-            if return_all_scores:
-                return gate_top_k_idx, gate_score, gate
-            return gate_top_k_idx, gate_score
-
-class CustomNaiveGate_HyperNet(BaseGate):
-    r"""
-    Naive Gate HyperRouter
-    """
-
-    def __init__(self, d_model, num_expert, world_size, top_k=2):
-        super().__init__(num_expert, world_size)
-        self.embedding = nn.Parameter(torch.randn([1, d_model], requires_grad=False).float().cuda())
-        self.hypernet = nn.Sequential(
-            nn.Linear(d_model, 256),
-            nn.ReLU(),
-            nn.Linear(256, d_model * self.tot_expert+self.tot_expert)
-        )
-        self.gate = nn.Linear(d_model, self.tot_expert)
-        self.top_k = top_k
-        self.dense_moe_flag = False
-        self.d_model = d_model
-
-    def forward(self, inp, return_all_scores=False):
-        self.hypernet_outputs = self.hypernet(self.embedding)[0]
-        # Get the weight splice for these layers and shape to weight tensor
-        weights_splice = self.hypernet_outputs.reshape([self.tot_expert, -1 ]) #(self.tot_expert, d_model+1)
-        del self.gate.weight
-        self.gate.weight = weights_splice[:, :-1]
-        del self.gate.bias
-        self.gate.bias = weights_splice[:, -1]
-        
-        gate = self.gate(inp)
+        gate = self._cosine(inp, self.expert_embeddings)
+        gate = self._make_finite(gate)
 
         if self.dense_moe_flag:
             gate = torch.ones_like(gate) # average the importance of all experts
@@ -427,6 +335,22 @@ class CustomNaiveGate_HyperNet(BaseGate):
 
         gate_score = F.softmax(gate_top_k_val, dim=-1)
 
+        self.set_load_balance(gate, gate_top_k_idx)
+
         if return_all_scores:
             return gate_top_k_idx, gate_score, gate
         return gate_top_k_idx, gate_score
+
+    def _cosine(self, mat1, mat2, eps=1e-4):
+        assert mat1.dim() == 2
+        assert mat2.dim() == 2
+        # mat1 = F.normalize(mat1, p=2.0, dim=1, eps=eps)
+        mat2 = F.normalize(mat2.float(), p=2.0, dim=1, eps=eps)
+        return mat1.float().matmul(mat2.transpose(0, 1)).type_as(mat1)
+
+    def _make_finite(self, scores):
+        ok = scores.isfinite()
+        if not ok.all():
+            # NaNs here can break the assignment algorithm
+            scores[~ok] = scores[ok].min()
+        return scores

@@ -41,7 +41,6 @@ parser.add_argument('--d_model', type=int, default=500,
 parser.add_argument('--d_inner', type=int, default=1000,
                     help='inner dimension in FF')
 parser.add_argument('--load_balance', type=float, default=0)
-parser.add_argument('--distillation', type=float, default=0)
 parser.add_argument('--dropout', type=float, default=0.0,
                     help='global dropout rate')
 parser.add_argument('--dropatt', type=float, default=0.0,
@@ -508,12 +507,10 @@ def train():
     for batch, (data, target, seq_len) in enumerate(train_iter):
 
         if args.gate_name == "CustomNaiveGate_Distill":
-            if batch > int(0.1*args.max_step):
-                if batch == int(0.1*args.max_step) + 1:
-                    print("Switch to Stage 2")
-                for name, m in model.named_modules():
-                    if isinstance(m, CustomNaiveGate_Distill):
-                        m.is_stage2 = True
+            if batch > int(0.2*args.max_step):
+                for name, p in model.named_parameters():
+                    if 'gate.gate' in name:
+                        p.requires_grad = False
 
         if args.gate_name == 'CustomDTSGate':
             set_temperature(model, train_step, args.max_step, args.max_temp, args.min_temp)
@@ -550,13 +547,6 @@ def train():
                     if isinstance(m, CustomNaiveGate_Balance):
                         balance_loss += m.loss
                 loss += args.load_balance * balance_loss
-
-            if args.distillation > 0:
-                distillation_loss = 0
-                for name, m in model.named_modules():
-                    if isinstance(m, CustomNaiveGate_Distill):
-                        distillation_loss += m.distillation_loss
-                loss += args.distillation * distillation_loss
 
             if args.fp16:
                 optimizer.backward(loss)
