@@ -15,11 +15,11 @@ python -u train_downstream.py \
     --warmup_step 0 \
     --max_step 15000 \
     --eval-interval 1500 \
-    --log-interval 300 \
+    --log-interval 100 \
     --tgt_len 512 \
     --mem_len 128 \
     --eval_tgt_len 128 \
-    --batch_size 4 \
+    --batch_size 16 \
     --work_dir ../ckps/finetuning/SMoE-enwik8 \
     --pretrained_weight $1 \
     --moe --moe-num-expert 16 --moe-top-k 2 \
