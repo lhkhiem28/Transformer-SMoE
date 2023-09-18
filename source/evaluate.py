@@ -586,7 +586,7 @@ def train():
                 epoch, train_step, batch+1, optimizer.param_groups[0]['lr'],
                 elapsed * 1000 / args.log_interval, cur_loss)
             if args.dataset in ['enwik8', 'text8']:
-                log_str += ' | bpc {:9.5f}'.format(cur_loss / math.log(2))
+                log_str += ' | bpc {:9.3f}'.format(cur_loss / math.log(2))
             else:
                 log_str += ' | ppl {:9.3f}'.format(math.exp(cur_loss))
             print(log_str)
@@ -612,7 +612,7 @@ def train():
                     train_step // args.eval_interval, train_step,
                     (time.time() - eval_start_time), val_loss_swa)
                 if args.dataset in ['enwik8', 'text8']:
-                    log_str += ' | bpc {:9.5f}'.format(val_loss_swa / math.log(2))
+                    log_str += ' | bpc {:9.3f}'.format(val_loss_swa / math.log(2))
                 else:
                     log_str += ' | valid ppl {:9.3f}'.format(math.exp(val_loss_swa))
                 print(log_str)
@@ -622,7 +622,7 @@ def train():
                     train_step // args.eval_interval, train_step,
                     (time.time() - eval_start_time), val_loss_dense_swa)
                 if args.dataset in ['enwik8', 'text8']:
-                    log_str_dense += ' | bpc {:9.5f}'.format(val_loss_dense_swa / math.log(2))
+                    log_str_dense += ' | bpc {:9.3f}'.format(val_loss_dense_swa / math.log(2))
                 else:
                     log_str_dense += ' | valid ppl {:9.3f}'.format(math.exp(val_loss_dense_swa))
                 print(log_str_dense)
@@ -636,7 +636,7 @@ def train():
                 train_step // args.eval_interval, train_step,
                 (time.time() - eval_start_time), val_loss)
             if args.dataset in ['enwik8', 'text8']:
-                log_str += ' | bpc {:9.5f}'.format(val_loss / math.log(2))
+                log_str += ' | bpc {:9.3f}'.format(val_loss / math.log(2))
             else:
                 log_str += ' | valid ppl {:9.3f}'.format(math.exp(val_loss))
             print(log_str)
@@ -646,7 +646,7 @@ def train():
                 train_step // args.eval_interval, train_step,
                 (time.time() - eval_start_time), val_loss_dense)
             if args.dataset in ['enwik8', 'text8']:
-                log_str_dense += ' | bpc {:9.5f}'.format(val_loss_dense / math.log(2))
+                log_str_dense += ' | bpc {:9.3f}'.format(val_loss_dense / math.log(2))
             else:
                 log_str_dense += ' | valid ppl {:9.3f}'.format(math.exp(val_loss_dense))
             print(log_str_dense)
@@ -717,7 +717,7 @@ for gate_number in [1,2,4,8,16,32,64]:
         test_loss = evaluate(model, te_iter)
         print('=' * 100)
         if args.dataset in ['enwik8', 'text8']:
-            print('Dense | End of training | Gate-Number {:.0f} | test loss {:5.2f} | test bpc {:9.5f}'.format(
+            print('Dense | End of training | Gate-Number {:.0f} | test loss {:5.2f} | test bpc {:9.3f}'.format(
                 gate_number, test_loss, test_loss / math.log(2)))
         else:
             print('Dense | End of training | Gate-Number {:.0f} | test loss {:5.2f} | test ppl {:9.3f}'.format(

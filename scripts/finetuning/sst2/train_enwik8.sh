@@ -3,7 +3,7 @@ python -u train_downstream.py \
     --cuda \
     --data ../datasets/finetuning/sst2 \
     --dataset sst2 \
-    --n_layer 4 \
+    --n_layer 1 \
     --d_model 256 \
     --n_head 8 \
     --d_head 64 \
