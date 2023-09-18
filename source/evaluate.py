@@ -6,6 +6,7 @@ import itertools
 import copy 
 import pdb
 import numpy as np
+import tqdm
 
 import torch
 import torch.nn as nn
@@ -233,7 +234,7 @@ corpus = get_lm_corpus(args.data, args.dataset)
 ntokens = len(corpus.vocab)
 args.n_token = ntokens
 
-eval_batch_size = 10
+eval_batch_size = 1
 tr_iter = corpus.get_iterator('train', args.batch_size, args.tgt_len,
     device=device, ext_len=args.ext_len)
 va_iter = corpus.get_iterator('valid', eval_batch_size, args.eval_tgt_len,
@@ -478,7 +479,7 @@ def evaluate(model, eval_iter):
     total_len, total_loss = 0, 0.
     with torch.no_grad():
         mems = tuple()
-        for i, (data, target, seq_len) in enumerate(eval_iter):
+        for i, (data, target, seq_len) in tqdm.tqdm(enumerate(eval_iter)):
             if args.max_eval_steps > 0 and i >= args.max_eval_steps:
                 break
             ret = model(data, target, *mems)
