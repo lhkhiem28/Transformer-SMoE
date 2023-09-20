@@ -519,7 +519,6 @@ def train():
             current_gate = adjust_moe_gate_number(model, train_step, args, current_gate)
 
         current_top_k = collect_top_k(model)
-        print(current_top_k)
         all_top_k.append(current_top_k)
 
         model.zero_grad()
