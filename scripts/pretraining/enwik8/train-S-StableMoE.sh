@@ -24,7 +24,7 @@ python -u train.py \
     --moe --moe-num-expert 16 --moe-top-k 2 \
     --gate_name CustomNaiveGate_Distill --load_balance 0.01 \
     --moe_index 0 \
-    --work_dir ../ckps/pretraining/StableMoE-S \
+    --work_dir ../ckps/pretraining/SMoE-S \
     # --dynamic_moe \
     # --dynamic_moe_mode linear_increase \
     # --dynamic_overall_steps 100000 \

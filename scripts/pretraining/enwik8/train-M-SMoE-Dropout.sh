@@ -24,7 +24,7 @@ python -u train.py \
     --moe --moe-num-expert 16 --moe-top-k 8 \
     --gate_name CustomNaiveGate --freeze_gate \
     --moe_index 0,1,2,3 \
-    --work_dir ../ckps/pretraining/SMoE-Dropout-M \
+    --work_dir ../ckps/pretraining/SMoE-M \
     --dynamic_moe \
     --dynamic_moe_mode linear_increase \
     --dynamic_overall_steps 200000 \
