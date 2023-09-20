@@ -15,18 +15,18 @@ python -u evaluate.py \
     --optim adam \
     --lr 0.00025 \
     --warmup_step 0 \
-    --max_step 200000 \
+    --max_step 100000 \
     --tgt_len 512 \
     --mem_len 512 \
     --eval_tgt_len 128 \
-    --batch_size 22 \
+    --batch_size 64 \
     --multi_gpu \
     --moe --moe-num-expert 16 --moe-top-k 2 \
     --gate_name CustomNaiveGate \
-    --moe_index 0,1,2,3 \
-    --dynamic_moe \
-    --dynamic_moe_mode linear_increase \
-    --dynamic_overall_steps 200000 \
-    --moe-top-k-min 16 \
-    --moe-top-k-max 16 \
+    --moe_index 0 \
     --work_dir ../ckps/pretraining/SMoE-S --run $1 \
+    # --dynamic_moe \
+    # --dynamic_moe_mode linear_increase \
+    # --dynamic_overall_steps 100000 \
+    # --moe-top-k-min 16 \
+    # --moe-top-k-max 16 \
