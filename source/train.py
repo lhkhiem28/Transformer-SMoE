@@ -345,15 +345,12 @@ set_threshold(model, args)
 freeze_part_weight(model, args)
 
 print(model)
-logging(model)
 for name, param in model.named_parameters():
     if param.requires_grad:
         if 'hypernet' in name:
             param.requires_grad = False
 print("Total of Prams: ", sum(p.numel() for p in model.parameters()))
 print("Total of Trainable Prams: ", sum(p.numel() for p in model.parameters() if p.requires_grad))
-logging("Total of Prams: ", sum(p.numel() for p in model.parameters()))
-logging("Total of Trainable Prams: ", sum(p.numel() for p in model.parameters() if p.requires_grad))
 
 if args.fp16:
     model = model.half()
@@ -522,6 +519,7 @@ def train():
             current_gate = adjust_moe_gate_number(model, train_step, args, current_gate)
 
         current_top_k = collect_top_k(model)
+        print(current_top_k)
         all_top_k.append(current_top_k)
 
         model.zero_grad()
